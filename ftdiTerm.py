@@ -7,6 +7,7 @@ import termios
 import tty
 import select
 import time
+import os
 
 def DataAvailable(pipe):
    return select.select([pipe], [], [], 0) == ([pipe], [], [])
@@ -18,9 +19,14 @@ if(len(sys.argv) != 2):
 old_settings_in = termios.tcgetattr(sys.stdin)
 old_settings_out = termios.tcgetattr(sys.stdout)
 
+outfileName = sys.argv[1]
+if os.path.exists(outfileName):
+   print "File %s Exists" % (outfileName,)
+   sys.exit(-1)
+
 serialDevices = glob.glob("/dev/tty.usbserial-*")
 serialDevice = serialDevices[0]
-outfile = open(sys.argv[1], "w")
+outfile = open(outfileName, "w")
 
 # open nonblocking
 ser=serial.Serial(serialDevice, baudrate = 115200, timeout = 0)
