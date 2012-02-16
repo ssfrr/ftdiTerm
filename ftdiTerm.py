@@ -6,6 +6,7 @@ import sys
 import termios
 import tty
 import select
+import time
 
 def DataAvailable(pipe):
    return select.select([pipe], [], [], 0) == ([pipe], [], [])
@@ -40,6 +41,7 @@ try:
       sys.stdout.write(buf)
       sys.stdout.flush()
       outfile.write(buf)
+      time.sleep(0.001)
 
 finally:
    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings_in)
