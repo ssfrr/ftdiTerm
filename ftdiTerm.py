@@ -12,21 +12,24 @@ import os
 def DataAvailable(pipe):
    return select.select([pipe], [], [], 0) == ([pipe], [], [])
 
-if(len(sys.argv) != 2):
-   print "Usage: %s <OUTFILE>" % (sys.argv[0],)
-   sys.exit(-1)
+if(len(sys.argv) >= 2):
+   outfileName = sys.argv[1]
+else:
+   outfileName = None
 
 old_settings_in = termios.tcgetattr(sys.stdin)
 old_settings_out = termios.tcgetattr(sys.stdout)
 
-outfileName = sys.argv[1]
-if os.path.exists(outfileName):
-   print "File %s Exists" % (outfileName,)
-   sys.exit(-1)
+if outfileName:
+   if os.path.exists(outfileName):
+      print "File %s Exists" % (outfileName,)
+      sys.exit(-1)
+   outfile = open(outfileName, "w")
+else:
+   outfile = None
 
 serialDevices = glob.glob("/dev/tty.usbserial-*")
 serialDevice = serialDevices[0]
-outfile = open(outfileName, "w")
 
 # open nonblocking
 ser=serial.Serial(serialDevice, baudrate = 115200, timeout = 0)
@@ -46,7 +49,8 @@ try:
       buf = ser.read(128)
       sys.stdout.write(buf)
       sys.stdout.flush()
-      outfile.write(buf)
+      if outfile:
+         outfile.write(buf)
       time.sleep(0.001)
 
 finally:
